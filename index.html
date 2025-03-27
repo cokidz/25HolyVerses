@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>25년 천안중부 암송구절</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #eef2f7;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            font-size: 2.8em;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .category {
+            margin-bottom: 30px;
+        }
+        .category-title.infant {
+            background: linear-gradient(90deg, #f1c40f, #f7e1a1);
+        }
+        .category-title.junior {
+            background: linear-gradient(90deg, #27ae60, #a3e4b6);
+        }
+        .category-title.senior {
+            background: linear-gradient(90deg, #4a90e2, #a1c4fd);
+        }
+        .category-title {
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .category-title:hover {
+            transform: translateY(-2px);
+        }
+        .months {
+            display: none;
+            margin-top: 15px;
+        }
+        .month-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .month-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        .month-title {
+            color: #e53e3e;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #fed7d7;
+            padding-bottom: 5px;
+            cursor: pointer;
+        }
+        .month-title:hover {
+            color: #c53030;
+        }
+        .verses {
+            display: block;
+            transition: all 0.3s ease;
+        }
+        .verses.hidden {
+            display: none;
+        }
+        .verse {
+            background-color: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .verse.selected {
+            border-color: #4a90e2;
+            box-shadow: 0 0 8px rgba(74, 144, 226, 0.5);
+        }
+        .verse-text {
+            font-size: 1em;
+        }
+        .verse-ref {
+            display: block;
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
+        }
+        .verse-desc {
+            display: inline;
+            font-size: 0.9em;
+            color: #718096;
+            margin-left: 5px;
+        }
+        #print-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #38a169;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+        #print-btn:hover {
+            background-color: #2f855a;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+            }
+            .category-title {
+                font-size: 1.2em;
+                padding: 10px 15px;
+            }
+            .month-title {
+                font-size: 1.1em;
+            }
+            .verse {
+                padding: 10px;
+            }
+            #print-btn {
+                font-size: 1em;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>25년 천안중부 암송구절</h1>
+    <div id="content"></div>
+    <button id="print-btn" onclick="printSelectedVerses()">체크된 구절 인쇄</button>
+
+    <script>
+        // 카테고리 접기/펼치기
+        function toggleMonths(element) {
+            const months = element.nextElementSibling;
+            months.style.display = months.style.display === "block" ? "none" : "block";
+        }
+
+        // 월별 구절 접기/펼치기
+        function toggleVerses(element) {
+            const verses = element.nextElementSibling;
+            verses.classList.toggle('hidden');
+        }
+
+        // 구절 선택 토글
+        function toggleSelect(element) {
+            element.classList.toggle('selected');
+        }
+
+        // 데이터 렌더링 함수
+        function renderContent(text) {
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '';
+
+            let currentCategory = null;
+            let currentMonth = null;
+            let categoryDiv, monthsDiv, monthDiv, versesDiv;
+
+            lines.forEach(line => {
+                // 카테고리 인식
+                if (line.match(/^(유아부|저학년|고학년)/)) {
+                    currentCategory = line;
+                    categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'category';
+
+                    const categoryTitle = document.createElement('div');
+                    categoryTitle.className = `category-title ${currentCategory.includes('유아부') ? 'infant' : currentCategory.includes('저학년') ? 'junior' : 'senior'}`;
+                    categoryTitle.textContent = currentCategory;
+                    categoryTitle.onclick = function() { toggleMonths(this); };
+                    categoryDiv.appendChild(categoryTitle);
+
+                    monthsDiv = document.createElement('div');
+                    monthsDiv.className = 'months';
+                    categoryDiv.appendChild(monthsDiv);
+
+                    contentDiv.appendChild(categoryDiv);
+                }
+                // 불필요한 줄 무시
+                else if (line === "월별 주제 및 핵심 교리 기반 구절" || line === "월별 주제 및 핵심 교리 기반 구절 (전체)") {
+                    return;
+                }
+                // 월별 주제 인식
+                else if (line.match(/^\d+월:/) && currentCategory) {
+                    currentMonth = line;
+                    monthDiv = document.createElement('div');
+                    monthDiv.className = 'month-card';
+
+                    const monthTitle = document.createElement('div');
+                    monthTitle.className = 'month-title';
+                    monthTitle.textContent = currentMonth;
+                    monthTitle.onclick = function() { toggleVerses(this); };
+                    monthDiv.appendChild(monthTitle);
+
+                    versesDiv = document.createElement('div');
+                    versesDiv.className = 'verses';
+                    monthDiv.appendChild(versesDiv);
+
+                    monthsDiv.appendChild(monthDiv);
+                }
+                // 구절 인식
+                else if (line.match(/^".*"/) && currentMonth) {
+                    const [textPart, desc] = line.split(' - ');
+                    const match = textPart.match(/"(.*)" \((.*)\)/);
+                    if (match) {
+                        const [text, ref] = match.slice(1);
+                        const verseDiv = document.createElement('div');
+                        verseDiv.className = 'verse';
+                        verseDiv.setAttribute('data-text', `"${text}" (${ref})`);
+                        verseDiv.setAttribute('data-desc', desc);
+                        verseDiv.onclick = function() { toggleSelect(this); };
+
+                        const verseText = document.createElement('span');
+                        verseText.className = 'verse-text';
+                        verseText.textContent = text;
+                        verseDiv.appendChild(verseText);
+
+                        const verseRef = document.createElement('span');
+                        verseRef.className = 'verse-ref';
+                        verseRef.innerHTML = `(${ref}) <span class="verse-desc">${desc}</span>`;
+                        verseDiv.appendChild(verseRef);
+
+                        versesDiv.appendChild(verseDiv);
+                    }
+                }
+            });
+        }
+
+        // 선택된 구절 인쇄
+        function printSelectedVerses() {
+            const selectedVerses = document.querySelectorAll('.verse.selected');
+            if (selectedVerses.length === 0) {
+                alert("선택된 구절이 없습니다!");
+                return;
+            }
+
+            let printContent = `
+                <html>
+                <head>
+                    <title>선택된 암송구절</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+                        h2 { color: #2d3748; }
+                        .verse { margin-bottom: 15px; }
+                        .verse-text { font-size: 1em; }
+                        .verse-ref { display: block; color: #718096; font-size: 0.9em; margin-top: 5px; }
+                        .verse-desc { margin-left: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <h2>선택된 암송구절</h2>
+            `;
+
+            selectedVerses.forEach(verse => {
+                const text = verse.querySelector('.verse-text').textContent;
+                const ref = verse.querySelector('.verse-ref').childNodes[0].textContent;
+                const desc = verse.getAttribute('data-desc');
+                printContent += `
+                    <div class="verse">
+                        <div class="verse-text">${text}</div>
+                        <span class="verse-ref">${ref} <span class="verse-desc">${desc}</span></span>
+                    </div>
+                `;
+            });
+
+            printContent += `
+                </body>
+                </html>
+            `;
+
+            const printWindow = window.open('', '_blank', 'width=600,height=400');
+            if (!printWindow) {
+                alert("팝업 차단을 해제해 주세요!");
+                return;
+            }
+            printWindow.document.open();
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => printWindow.print(), 500);
+        }
+
+        // 페이지 로드 시 verses.txt 가져오기
+        window.onload = function() {
+            const url = 'https://raw.githubusercontent.com/cokidz/25CheonanJungbu5th/refs/heads/main/verses.txt';
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('파일을 불러오지 못했습니다.');
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    renderContent(text);
+                })
+                .catch(error => {
+                    console.error('오류:', error);
+                    alert('verses.txt 파일을 불러오는 데 실패했습니다. URL을 확인하세요.');
+                });
+        };
+    </script>
+</body>
+</html>

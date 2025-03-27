@@ -136,9 +136,17 @@
         // 카테고리 접기/펼치기
         function toggleMonths(element) {
             const monthsDiv = element.nextElementSibling;
-            monthsDiv.style.display = monthsDiv.style.display === 'none' ? 'block' : 'none';
-        }
+            const isOpening = monthsDiv.style.display === 'none' || monthsDiv.style.display === '';
+            monthsDiv.style.display = isOpening ? 'block' : 'none';
 
+            // 열릴 때 모든 verses를 닫힌 상태로 유지
+            if (isOpening) {
+                const versesDivs = monthsDiv.querySelectorAll('.verses');
+                versesDivs.forEach(verses => {
+                    verses.classList.add('hidden'); // 구절을 닫힌 상태로 설정
+                });
+            }
+        }
         // 월별 구절 접기/펼치기
         function toggleVerses(element) {
             const versesDiv = element.nextElementSibling;
